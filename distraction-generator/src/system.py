@@ -59,7 +59,7 @@ class DistractionGeneratorSystem:
                 # self._print_options(round_num, input_data["options"])
 
                 if round_num == self.max_rounds - 1:
-                    return self._format_question(input_data["distractors"])
+                    return input_data["distractors"]
 
                 round_num += 1
 

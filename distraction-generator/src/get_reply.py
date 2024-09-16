@@ -1,5 +1,6 @@
 import base64
 from textwrap import dedent
+from typing import Optional
 
 from openai import OpenAI
 from pydantic import BaseModel
@@ -21,13 +22,13 @@ def get_image_base64(image_input: str) -> str:
 def get_reply(
     image_path: str,
     model: str,
-    api_key: str,
     system_prompt: str,
     user_prompt: str,
     format: BaseModel,
-    temperature: float = 0.5,
+    temperature: Optional[float] = None,
+    api_key: Optional[str] = None,
 ):
-    client = OpenAI(api_key=api_key)
+    client = OpenAI()
     image_base64 = get_image_base64(image_path)
 
     completion = client.beta.chat.completions.parse(
@@ -37,7 +38,7 @@ def get_reply(
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": user_prompt},
+                    {"type": "text", "text": dedent(user_prompt)},
                     {
                         "type": "image_url",
                         "image_url": {"url": f"data:image/png;base64,{image_base64}"},
