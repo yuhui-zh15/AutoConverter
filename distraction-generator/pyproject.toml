@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "framework"
+version = "0.1.0"
+description = "a framework for distraction generation"
+authors = ["Leo <142374191+leo1oel@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+openai = "^1.43.0"
+ipykernel = "^6.29.5"
+loguru = "*"
+pandas = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
