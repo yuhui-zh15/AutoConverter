@@ -1,5 +1,5 @@
 num_choice = 6
-fusion_selected_choice_num = 10
+fusion_selected_choice_num = 3
 
 
 concept_generation_system_prompt = f"""
@@ -310,7 +310,11 @@ fusion_generation_system_prompt = f"""
 
     Output format:
     - Provide a list of {fusion_selected_choice_num} distractor options based on your careful selection.
-    - Do not include any explanations or difficulty levels after the options.
+    - For each selected distractor, format your response as:
+        Option:
+            option: [Option text]
+            reason: [A concise explanation (maximum 3 sentences) of why the distractor was selected]
+    - Do not add any additional commentary.
 
     Remember:
     - Your primary goal is to create a challenging yet educational set of distractors that will effectively test students' understanding of the subject matter in relation to the provided image(s).
