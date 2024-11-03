@@ -2,6 +2,7 @@ data/
 *.json
 *.jsonl
 *.tsv
+*.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
