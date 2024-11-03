@@ -362,10 +362,7 @@ confuse_system_prompt = """
     - Be aware of potential biases or assumptions in your interpretation.
     - If the question involves quantitative data, ensure your analysis includes precise observations and calculations where necessary.
 
-    Your response should only include the numbers of the three selected options, formatted as follows:
-    option1: [Number of first selected option]
-    option2: [Number of second selected option]
-    option3: [Number of third selected option]
+    Your response should include three selected options and the reasons for your choices.
 
     Remember:
     - Your goal is to identify the three most correct or most plausible options based on the given image(s) and question.
