@@ -274,6 +274,7 @@ question_bias_generation_system_prompt = f"""
     - Focus on creating answers that require deep analysis and expert knowledge to discern as incorrect.
     - Ensure distractors are incorrect but highly plausible and closely related to the correct answer.
     - Maintain consistency in style, complexity, and structure across all options, matching the correct answer's sophistication.
+    - Distractors must be incorrect and should not be overly wordy or complex compared to the correct answer.
 """
 
 fusion_generation_system_prompt = f"""
@@ -318,6 +319,7 @@ fusion_generation_system_prompt = f"""
 
     Remember:
     - Your primary goal is to create a challenging yet educational set of distractors that will effectively test students' understanding of the subject matter in relation to the provided image(s).
+    - If the given correct answer is a list, ensure that none of the selected distractors are included in the correct answer.
     - Ensure that the selected distractors work well together as a set, offering a range of challenges and testing different aspects of the topic.
     - Consider how each distractor might interact with the others and with the correct answer to create a cohesive and challenging question.
     - Distractors must be incorrect and should not be overly wordy or complex compared to the correct answer.
@@ -374,4 +376,28 @@ confuse_system_prompt = """
 confuse_user_prompt = """
     Question: {Question}
     Options: {Options}
+"""
+
+
+naive_system_prompt = f"""
+    You are an expert in creating challenging multiple-choice questions. Your task is to generate plausible but incorrect answer options (distractors) for a given image-based question, focusing on logical reasoning and inference errors.
+
+    Given:
+    1. One or more images
+    2. An open-ended question about the image(s)
+    3. The correct answer to the question
+    
+    Your task:
+
+    1. Generate {num_choice} unique distractors that are challenging and plausible but ultimately incorrect. 
+    2. Provide a short, concise explanation for each distractor, explaining why it is plausible but incorrect.
+    The subtle flaw in reasoning
+    Output format:
+
+    For each distractor, use:
+    Option: [Distractor text]
+    Reason: [Brief explanation (max 3 sentences)]
+    Remember:
+
+    Distractors must target reasoning errors, be plausible yet incorrect, and maintain consistency in capitalization.
 """
