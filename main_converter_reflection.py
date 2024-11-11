@@ -12,6 +12,12 @@ from prompts import (
     question_bias_generation_system_prompt,
     fusion_generation_system_prompt,
     confuse_system_prompt,
+    refine_system_prompt_concept,
+    refine_system_prompt_reason,
+    refine_system_prompt_visual,
+    refine_system_prompt_data,
+    refine_system_prompt_question_bias,
+    review_system_prompt,
 )
 
 
@@ -25,6 +31,15 @@ class Distractor(BaseModel):
 
 class Distractors(BaseModel):
     distractors: list[Distractor]
+
+
+class Comment(BaseModel):
+    option: str
+    comment: str
+
+
+class CommentFormat(BaseModel):
+    comments: list[Comment]
 
 
 def base64_to_image(base64_str):
@@ -79,6 +94,100 @@ def convert_to_multi_choice(question, answer, image_base64):
     distractors_question_bias = get_reply(
         question_bias_generation_system_prompt, user_prompt, image_base64, Distractors
     )["distractors"]
+    # print(distractors_concept)
+
+    ############ Round 1 ############
+    user_prompt = """
+        Question: {question}
+        Correct Answer: {answer}
+        Distractions and Reasonings: {distractors}
+    """
+    reviews_concept = get_reply(
+        review_system_prompt.format(type="conceptual"),
+        user_prompt.format(
+            question=question, answer=answer, distractors=distractors_concept
+        ),
+        image_base64,
+        CommentFormat,
+    )["comments"]
+    reviews_reasoning = get_reply(
+        review_system_prompt.format(type="reasoning"),
+        user_prompt.format(
+            question=question, answer=answer, distractors=distractors_reasoning
+        ),
+        image_base64,
+        CommentFormat,
+    )["comments"]
+    reviews_visual_interpretation = get_reply(
+        review_system_prompt.format(type="visual interpretation"),
+        user_prompt.format(
+            question=question,
+            answer=answer,
+            distractors=distractors_visual_interpretation,
+        ),
+        image_base64,
+        CommentFormat,
+    )["comments"]
+    reviews_data_processing = get_reply(
+        review_system_prompt.format(type="data processing"),
+        user_prompt.format(
+            question=question, answer=answer, distractors=distractors_data_processing
+        ),
+        image_base64,
+        CommentFormat,
+    )["comments"]
+    reviews_question_bias = get_reply(
+        review_system_prompt.format(type="question bias"),
+        user_prompt.format(
+            question=question, answer=answer, distractors=distractors_question_bias
+        ),
+        image_base64,
+        CommentFormat,
+    )["comments"]
+    # print(reviews_concept)
+
+    user_prompt = """
+        Question: {question}
+        Correct Answer: {answer}
+        Distractions and Reviewer Comments: {reviews}
+    """
+    distractors_concept = get_reply(
+        refine_system_prompt_concept,
+        user_prompt.format(question=question, answer=answer, reviews=reviews_concept),
+        image_base64,
+        Distractors,
+    )["distractors"]
+    distractors_reasoning = get_reply(
+        refine_system_prompt_reason,
+        user_prompt.format(question=question, answer=answer, reviews=reviews_reasoning),
+        image_base64,
+        Distractors,
+    )["distractors"]
+    distractors_visual_interpretation = get_reply(
+        refine_system_prompt_visual,
+        user_prompt.format(
+            question=question, answer=answer, reviews=reviews_visual_interpretation
+        ),
+        image_base64,
+        Distractors,
+    )["distractors"]
+    distractors_data_processing = get_reply(
+        refine_system_prompt_data,
+        user_prompt.format(
+            question=question, answer=answer, reviews=reviews_data_processing
+        ),
+        image_base64,
+        Distractors,
+    )["distractors"]
+    distractors_question_bias = get_reply(
+        refine_system_prompt_question_bias,
+        user_prompt.format(
+            question=question, answer=answer, reviews=reviews_question_bias
+        ),
+        image_base64,
+        Distractors,
+    )["distractors"]
+    # print(distractors_concept)
 
     distractors = (
         distractors_concept

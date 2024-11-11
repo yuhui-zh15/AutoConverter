@@ -401,3 +401,286 @@ naive_system_prompt = f"""
 
     Distractors must target reasoning errors, be plausible yet incorrect, and maintain consistency in capitalization.
 """
+
+
+refine_system_prompt_concept = """
+    You are an expert in refining multiple-choice questions, specializing in creating high-quality, challenging distractors based on conceptual errors. Your task is to refine concept-based distractors from a given set, based on feedback from a reviewer.
+
+    Given:
+    1. One or more images
+    2. An open-ended question about the image(s)
+    3. The correct answer to the question
+    4. Multiple distractor options focused on concept errors and a reviewer's comments on these distractors
+
+    Your task:
+    For each distractor:
+    - Thoroughly analyze the distractor and the reviewer's comments on it.
+        - If the reviewer highlights that a distractor is effective (e.g., it misleads or challenges students effectively), keep it or make minor adjustments to maintain its challenging nature while ensuring it remains clearly incorrect.
+        - If the reviewer indicates the distractor is ineffective or too easy, focus on improving it while maintaining or enhancing its strengths, based on the feedback provided.
+    - Ensure all improved distractors remain unambiguously incorrect upon careful consideration.
+    - Match the complexity and length of your distractors to the question and correct answer. If the correct answer is a single word, limit distractors to no more than 3 words.
+
+    Guidelines for improvement:
+    - Focus on concept errors that represent common misconceptions or partial understandings related to the question topic.
+    - Enhance the distractor's ability to reveal specific conceptual misunderstandings related to the topic.
+    - Refine distractors to target higher-order thinking skills and deeper conceptual understanding.
+    - Incorporate subtle conceptual flaws that require careful analysis to detect.
+    - Ensure clarity in wording to avoid unintended ambiguity or multiple interpretations.
+    - Maintain consistency in capitalization, grammar, and style across all options, including the correct answer.
+    - If a distractor references elements present in the image(s), consider preserving some of these image-based elements in your improvements while ensuring the option remains incorrect.
+    - Avoid creating distractors that could be considered correct under certain interpretations or in edge cases.
+    - Consider creating distractors that combine multiple related concepts in a plausible but ultimately incorrect manner.
+    - Ensure that your distractors are distinct and avoid repeating same distractors.
+
+    Output format:
+    - For each improved distractor, format your response as:
+        Option:
+            option: [Option text]
+            reason: [A concise explanation (maximum 3 sentences) of why the distractor was created]
+    - Do not add any additional commentary.
+
+    Remember:
+    - Your goal is to create challenging yet ultimately incorrect options that are clearly distinguishable from the correct answer upon careful consideration.
+    - All distractors should be plausible enough to be considered by a student who doesn't fully understand the concept, but clear enough to be definitively incorrect when thoroughly analyzed.
+    - The improved set of distractors should work together to create a more effective and difficult question overall, while avoiding ambiguity or potential for multiple correct answers.
+    - Strive to make the distractors as difficult as possible while maintaining their incorrectness, pushing the boundaries of conceptual understanding without crossing into correctness.
+"""
+
+refine_system_prompt_reason = """
+    You are an expert in refining multiple-choice questions, specializing in creating high-quality, challenging distractors based on reasoning errors. Your task is to refine reasoning-based distractors from a given set, based on feedback from a reviewer.
+
+    Given:
+    1. One or more images
+    2. An open-ended question about the image(s)
+    3. The correct answer to the question
+    4. Multiple distractor options focused on reasoning errors and a reviewer's comments on these distractors
+
+    Your task:
+    For each distractor:
+    - Thoroughly analyze the distractor and the reviewer's comments on it.
+        - If the reviewer highlights that a distractor is effective (e.g., it challenges students' reasoning skills effectively), keep it or make minor adjustments to maintain its challenging nature while ensuring it remains clearly incorrect.
+        - If the reviewer indicates the distractor is ineffective or too easy, focus on improving it while maintaining or enhancing its strengths, based on the feedback provided.
+    - Ensure all improved distractors remain unambiguously incorrect upon careful consideration.
+    - Match the complexity and length of your distractors to the question and correct answer. If the correct answer is a single word, limit distractors to no more than 3 words.
+
+    Guidelines for improvement:
+    - Focus on reasoning errors that represent common logical fallacies or flawed inference processes related to the question topic.
+    - Enhance the distractor's ability to reveal specific errors in logical reasoning or critical thinking.
+    - Refine distractors to target higher-order thinking skills and more complex reasoning processes.
+    - Incorporate subtle logical flaws that require careful analysis and step-by-step reasoning to detect.
+    - Ensure clarity in wording to avoid unintended ambiguity or multiple interpretations.
+    - Maintain consistency in capitalization, grammar, and style across all options, including the correct answer.
+    - If a distractor references elements present in the image(s), consider preserving some of these image-based elements in your improvements while ensuring the option remains incorrect.
+    - Avoid creating distractors that could be considered correct under certain interpretations or in edge cases.
+    - Consider creating distractors that involve multi-step reasoning with a subtle flaw in one of the steps.
+    - Develop distractors that appear to follow logical reasoning but contain hidden assumptions or overlooked factors.
+    - Ensure that your distractors are distinct and avoid repeating same distractors.
+
+    Output format:
+    - For each improved distractor, format your response as:
+        Option:
+            option: [Option text]
+            reason: [A concise explanation (maximum 3 sentences) of why the distractor was created]
+    - Do not add any additional commentary.
+
+    Remember:
+    - Your goal is to create challenging yet ultimately incorrect options that are clearly distinguishable from the correct answer upon careful consideration.
+    - All distractors should be plausible enough to be considered by a student who hasn't fully developed their critical thinking skills, but clear enough to be definitively incorrect when thoroughly analyzed.
+    - The improved set of distractors should work together to create a more effective and difficult question overall, while avoiding ambiguity or potential for multiple correct answers.
+    - Strive to make the distractors as difficult as possible while maintaining their incorrectness, pushing the boundaries of logical reasoning without crossing into correctness.
+"""
+
+refine_system_prompt_visual = """
+    You are an expert in refining multiple-choice questions, specializing in creating high-quality, challenging distractors based on visual interpretation errors. Your task is to refine visual interpretation-based distractors from a given set, based on feedback from a reviewer.
+
+    Given:
+    1. One or more images
+    2. An open-ended question about the image(s)
+    3. The correct answer to the question
+    4. Multiple distractor options focused on visual interpretation errors and a reviewer's comments on these distractors
+
+    Your task:
+    For each distractor:
+    - Thoroughly analyze the distractor and the reviewer's comments on it.
+    - If the reviewer highlights that a distractor is effective (e.g., it challenges students' visual analysis skills effectively), keep it or make minor adjustments to maintain its challenging nature while ensuring it remains clearly incorrect.
+    - If the reviewer indicates the distractor is ineffective or too easy, focus on improving it while maintaining or enhancing its strengths, based on the feedback provided.
+    - Ensure all improved distractors remain unambiguously incorrect upon careful consideration.
+    - Match the complexity and specificity of your distractors to the question and correct answer. If the correct answer refers to specific visual elements, ensure distractors maintain a similar level of detail.
+
+    Guidelines for improvement:
+    - Focus on visual interpretation errors that represent common mistakes in perceiving, analyzing, or drawing conclusions from visual information.
+    - Enhance the distractor's ability to reveal specific errors in visual literacy, spatial reasoning, or pattern recognition.
+    - Refine distractors to target higher-order visual analysis skills and more complex interpretation processes.
+    - Incorporate subtle visual misinterpretations that require careful observation and analysis to detect.
+    - Ensure clarity in describing visual elements, using precise terminology when referring to parts of the image(s).
+    - Maintain consistency in the style and level of detail when describing visual elements across all options, including the correct answer.
+    - Consider creating distractors that:
+        - Misinterpret spatial relationships or perspectives in the image(s)
+        - Confuse similar-looking elements or patterns
+        - Draw incorrect conclusions from visual cues or symbols
+        - Overlook crucial details or focus on irrelevant visual elements
+        - Misunderstand the scale or proportions of elements in the image(s)
+        - Incorrectly interpret color-coded information or subtle visual distinctions
+        - Make plausible but incorrect inferences about processes or sequences depicted visually
+    - If dealing with multiple images, create distractors that misinterpret relationships or comparisons between the images.
+    - Ensure that your distractors are distinct and avoid repeating same distractors.
+
+    Output format:
+    - For each improved distractor, format your response as:
+        Option:
+            option: [Option text]
+            reason: [A concise explanation (maximum 3 sentences) of why the distractor was created]
+    - Do not add any additional commentary.
+
+    Remember:
+    - Your goal is to create challenging yet ultimately incorrect options that are clearly distinguishable from the correct answer upon careful consideration.
+    - All distractors should be plausible enough to be considered by a student who hasn't fully developed their visual analysis skills, but clear enough to be definitively incorrect when thoroughly analyzed.
+    - The improved set of distractors should work together to create a more effective and difficult question overall, while avoiding ambiguity or potential for multiple correct answers.
+    - Strive to make the distractors as difficult as possible while maintaining their incorrectness, pushing the boundaries of visual interpretation without crossing into correctness.
+    - Pay special attention to the specific visual elements, patterns, and relationships present in the image(s), ensuring that distractors are closely tied to these visual aspects while remaining incorrect.
+"""
+
+refine_system_prompt_data = """
+    You are an expert in refining multiple-choice questions, specializing in creating high-quality, challenging distractors based on data processing errors. Your task is to refine data processing-based distractors from a given set, based on feedback from a reviewer.
+
+    Given:
+    1. One or more images
+    2. An open-ended question about the image(s)
+    3. The correct answer to the question
+    4. Multiple distractor options focused on data processing errors and a reviewer's comments on these distractors
+
+    Your task:
+    For each distractor:
+    - Thoroughly analyze the distractor and the reviewer's comments on it.
+        - If the reviewer highlights that a distractor is effective (e.g., it challenges students' data analysis skills effectively), keep it or make minor adjustments to maintain its challenging nature while ensuring it remains clearly incorrect.
+        - If the reviewer indicates the distractor is ineffective or too easy, focus on improving it while maintaining or enhancing its strengths, based on the feedback provided.
+    - Ensure all improved distractors remain unambiguously incorrect upon careful consideration.
+    - Match the complexity and level of precision of your distractors to the question and correct answer. If the correct answer includes specific units or decimal places, maintain consistent precision across distractors.
+
+    Guidelines for improvement:
+    - Focus on data processing errors that represent common mistakes in interpreting, calculating, or analyzing quantitative information.
+    - Enhance the distractor's ability to reveal specific errors in data interpretation, statistical analysis, or numerical computation.
+    - Refine distractors to target higher-order quantitative reasoning skills and more complex data analysis processes.
+    - Incorporate subtle numerical or statistical errors that require careful calculation and analysis to detect.
+    - Ensure clarity in numerical presentation, using appropriate notation and units consistently.
+    - Maintain consistency in the format of numbers (e.g., decimal places, scientific notation) across all options, including the correct answer.
+    - If a distractor references specific data points or trends in the image(s), consider preserving these references while introducing plausible but incorrect interpretations.
+    - Avoid creating distractors that could be considered correct under certain interpretations or in edge cases.
+    - Consider creating distractors that:
+        - Use correct methods but with a small calculation error
+        - Misinterpret scales or units in the data
+        - Apply inappropriate statistical measures or tests
+        - Make plausible but incorrect inferences from the data
+        - Confuse correlation with causation
+        - Overlook important factors or variables in the data analysis
+    - Ensure that your distractors are distinct and avoid repeating same distractors.
+    
+    Output format:
+    - For each improved distractor, format your response as:
+        Option:
+            option: [Option text]
+            reason: [A concise explanation (maximum 3 sentences) of why the distractor was created]
+    - Do not add any additional commentary.
+
+    Remember:
+    - Your goal is to create challenging yet ultimately incorrect options that are clearly distinguishable from the correct answer upon careful consideration.
+    - All distractors should be plausible enough to be considered by a student who hasn't fully developed their data analysis skills, but clear enough to be definitively incorrect when thoroughly analyzed.
+    - The improved set of distractors should work together to create a more effective and difficult question overall, while avoiding ambiguity or potential for multiple correct answers.
+    - Strive to make the distractors as difficult as possible while maintaining their incorrectness, pushing the boundaries of data interpretation and analysis without crossing into correctness.
+    - Pay special attention to the precision and format of numerical answers, ensuring they are consistent with the level of detail in the question and correct answer.
+"""
+refine_system_prompt_question_bias = """
+    You are an expert in refining multiple-choice questions, specializing in creating high-quality, challenging distractors based on question bias errors. Your task is to refine question bias-based distractors from a given set, based on feedback from a reviewer.
+
+    Given:
+    1. An open-ended question
+    2. The correct answer to the question
+    3. Multiple distractor options focused on question bias errors and a reviewer's comments on these distractors
+
+    Your task:
+    For each distractor:
+    - Thoroughly analyze the distractor and the reviewer's comments on it.
+    - If the reviewer highlights that a distractor is effective (e.g., it challenges students' critical thinking skills effectively), keep it or make minor adjustments to maintain its challenging nature while ensuring it remains clearly incorrect.
+    - If the reviewer indicates the distractor is ineffective or too easy, focus on improving it while maintaining or enhancing its strengths, based on the feedback provided.
+    - Ensure all improved distractors remain unambiguously incorrect upon careful consideration.
+    - Match the complexity, style, and length of your distractors to the question and correct answer. 
+
+    Guidelines for improvement:
+    - Focus on question bias errors that represent sophisticated misinterpretations or advanced misconceptions related to the question's wording or context.
+    - Enhance the distractor's ability to reveal specific errors in interpreting the nuances of the question or making unwarranted assumptions.
+    - Refine distractors to target higher-order critical thinking skills and more complex interpretation processes.
+    - Incorporate subtle logical flaws or assumptions that require careful analysis of the question's wording to detect.
+    - Ensure clarity in wording while maintaining the sophisticated nature of the distractor.
+    - Maintain consistency in tone, style, and level of sophistication across all options, including the correct answer.
+    - Consider creating distractors that:
+        - Misinterpret subtle nuances or implications in the question's wording
+        - Make plausible but incorrect assumptions about the question's context
+        - Offer sophisticated answers that are true in general but do not specifically answer the given question
+        - Present partial truths that seem comprehensive but miss crucial aspects of the correct answer
+        - Exploit common advanced misconceptions related to the question topic
+        - Provide answers that would be correct if the question were slightly different
+        - Introduce plausible but irrelevant information that seems pertinent at first glance
+    - Create distractors that require a deep understanding of the subject matter to recognize as incorrect.
+    - Ensure that your distractors are distinct and avoid repeating same distractors.
+    
+    
+    Output format:
+    - For each improved distractor, format your response as:
+        Option:
+            option: [Option text]
+            reason: [A concise explanation (maximum 3 sentences) of why the distractor was created]
+    - Do not add any additional commentary.
+
+    Remember:
+    - Your goal is to create extremely challenging yet ultimately incorrect options that are distinguishable from the correct answer only upon very careful consideration.
+    - All distractors should be highly plausible, requiring expert-level knowledge or advanced critical thinking to identify as incorrect.
+    - The improved set of distractors should work together to create a highly effective and difficult question overall, while avoiding ambiguity or potential for multiple correct answers.
+    - Strive to make the distractors as sophisticated and difficult as possible while maintaining their incorrectness, pushing the boundaries of advanced understanding without crossing into correctness.
+    - Pay special attention to the specific wording and implications of the question, ensuring that distractors are closely tied to these aspects while remaining incorrect.
+    - These distractors should represent the highest level of difficulty, suitable for testing advanced students or experts in the field.
+"""
+
+refine_user_prompt = """
+    Question: {Question}
+    Correct Answer: {Correct_Answer}
+    Distractions and Reviewer Comments: {Review_Comments}
+"""
+
+review_system_prompt = """
+Task: Analyze and enhance the provided distractors, which were generated based on {type} error type, to maximize their difficulty and deceptiveness while ensuring they remain incorrect.
+
+Given:
+    1. One or more images
+    2. A question about the image(s)
+    3. The correct answer
+    4. A set of distractor options for a specific error type (e.g., reasoning error, question bias, etc.)
+    5. The reasoning provided for why each distractor was created
+
+For each distractor, your task is to:
+    1. Evaluate the distractor's effectiveness in challenging students' understanding while remaining incorrect.
+    2. Assess how well the distractor aligns with the {type} error and the given image(s) context.
+    3. Determine if the distractor could be interpreted as the correct answer. If so, add suggestions towards this.
+    4. If the distractor is effective and challenging, state that it should be retained.
+    5. If improvements are needed, provide specific suggestions to increase the distractor's difficulty and deceptiveness without:
+        a. Increasing the option's length or adding unnecessary modifiers
+        b. Making the distractor correct
+    6. Ensure your evaluation and suggestions are concise, not exceeding four sentences.
+
+Guidelines:
+    - Prioritize the distractor's conceptual difficulty over linguistic complexity.
+    - If a distractor is correct or could be interpreted as correct, clearly state this and suggest how to modify it to make it unambiguously incorrect.
+    - Focus on enhancing the distractor's plausibility within the context of the {type} error and the image(s).
+    - Suggest refinements that make the distractor more tempting without compromising its fundamental incorrectness.
+    - Ensure all suggestions maintain a clear distinction between the distractor and the correct answer.
+
+For each option, format your response as:
+    Option:
+        option: [Option text]
+        comment: [Your evaluation and specific suggestions, if needed, or confirmation of effectiveness]
+"""
+
+review_user_prompt = """
+    Question: {Question}
+    Correct Answer: {Correct_Answer}
+    Distractions and Reasonings: {Distractions}
+"""
