@@ -1,14 +1,10 @@
 import json
-import glob
-import os
-import pandas as pd
 from PIL import Image
 import base64
 import io
 from openai import OpenAI
 from pydantic import BaseModel
 from textwrap import dedent
-from tqdm import tqdm, trange
 from copy import deepcopy
 import random
 
@@ -177,11 +173,7 @@ def improve_multichoice_correctness_with_image(
 
 
 if __name__ == "__main__":
-    annotations = json.load(
-        open(
-            "/pasteur2/u/yuhuiz/CVPR/AutoConverter/ipynb/annotations_20241109_0042.json"
-        )
-    )
+    annotations = json.load(open("data.json"))
 
     item = deepcopy(annotations[373])
     print(item)
