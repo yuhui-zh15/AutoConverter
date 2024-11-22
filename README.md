@@ -15,12 +15,11 @@ The rapid development of vision language models (VLMs) demands rigorous and reli
 **Overview.** *(Left)* We analyze existing open-ended VQA evaluation metrics, underscoring their limitations in providing accurate and reproducible assessments. *(Middle)* We introduce AutoConverter, a multi-agent system that automatically converts open-ended questions into multiple-choice format, enabling objective assessment while reducing the costly question creation process. *(Right)* Using AutoConverter, we convert and refine 20 existing VQA datasets into a unified multiple-choice benchmark to support future VLM research.
 
 
-### 🛠️ Method: AutoConverter
+## 🛠️ Method: AutoConverter
 
+Check out [autoconverter_stage1.py](autoconverter_stage1.py) and [autoconverter_stage2.py](autoconverter_stage2.py) for the implementation of AutoConverter.
 
-
-
-### 💎 Dataset: VMCBench
+## 💎 Dataset: VMCBench
 
 Dataset is available at [Anonymous Google Drive](https://drive.google.com/file/d/1VXm0wrw39gODXCnKIVy1GtpCXzHhDkpo/view?usp=sharing).
 
