@@ -315,7 +315,7 @@ def process_one_question(api_key, image, question, answer, components):
         client, question, answer, image_base64, reviewer
     )
 
-    choices = [item["text"] for item in distactors] + answer
+    choices = [item["text"] for item in distactors] + [answer]
     random.shuffle(choices)
 
     if refiner:
