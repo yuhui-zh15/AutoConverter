@@ -335,7 +335,7 @@ def process_one_question(api_key, image, question, answer, components):
         choices = distractors["distractors"] + [answer]
         random.shuffle(choices)
 
-    output = f"Question: {question}\n\nA. {choices[0]}\nB.{choices[1]}\nC. {choices[2]}\nD. {choices[3]}\n\nAnswer: {'ABCD'[choices.index(answer)]}"
+    output = f"Question: {question}\n\nA. {choices[0]}\nB. {choices[1]}\nC. {choices[2]}\nD. {choices[3]}\n\nAnswer: {'ABCD'[choices.index(answer)]}"
     return output
 
 
