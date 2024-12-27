@@ -93,8 +93,10 @@ def process_json(file):
 
     # Convert to DataFrame
     df = pd.DataFrame(data)
+    df = df[['index', 'prediction']]
     answer_data = json.load(open("data/answer.json"))
-
+    answer_df = pd.DataFrame(answer_data)
+    df = df.merge(answer_df, on="index", how="left")
     
     # Example categories
     general_datasets = ["SEEDBench", "MMStar", "A-OKVQA", "VizWiz", "MMVet", 
