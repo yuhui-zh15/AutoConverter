@@ -1,359 +1,171 @@
-import base64
-import io
-import random
-from textwrap import dedent
-
 import gradio as gr
-from openai import OpenAI
-from PIL import Image
-from pydantic import BaseModel
+import pandas as pd
+import json
+import os
+import random
+random.seed(0)
 
-from prompts import (
-    concept_generation_system_prompt,
-    data_processing_generation_system_prompt,
-    evaluator_system_prompt,
-    fusion_generation_system_prompt,
-    question_bias_generation_system_prompt,
-    reasoning_generation_system_prompt,
-    refine_system_prompt_concept,
-    refine_system_prompt_data,
-    refine_system_prompt_question_bias,
-    refine_system_prompt_reason,
-    refine_system_prompt_visual,
-    refiner_system_prompt,
-    review_system_prompt,
-    visual_interpretation_generation_system_prompt,
-)
-
-
-class Distractor(BaseModel):
-    text: str
-    reason: str
-
-
-class Distractors(BaseModel):
-    distractors: list[Distractor]
-
-
-class Comment(BaseModel):
-    option: str
-    comment: str
-
-
-class CommentFormat(BaseModel):
-    comments: list[Comment]
-
-
-class Judgement(BaseModel):
-    reasoning: str
-    correctness: int
-    improvement: str
-
-
-class Question(BaseModel):
-    reasoning: str
-    distractors: list[str]
-
-
-def base64_to_image(base64_str):
-    image_data = base64.b64decode(base64_str)
-    image = Image.open(io.BytesIO(image_data))
-    return image
-
-
-def get_reply(client, system_prompt, user_prompt, image_base64, output_format):
-    completion = client.beta.chat.completions.parse(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": dedent(system_prompt)},
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": dedent(user_prompt)},
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/png;base64,{image_base64}"},
-                    },
-                ],
-            },
-        ],
-        response_format=output_format,
-        # temperature=0,  # Set to 0 for deterministic responses
-    )
-    parsed_output = completion.choices[0].message.parsed.dict()
-    return parsed_output
-
-
-def convert_to_multi_choice(client, question, answer, image_base64, reviewer):
-    user_prompt = f"""
-    Question: {question}
-    Correct Answer: {answer}
+def parse_multi_choice_response(response, all_choices, index2ans):
     """
-
-    distractors_concept = get_reply(
-        client, concept_generation_system_prompt, user_prompt, image_base64, Distractors
-    )["distractors"]
-    distractors_reasoning = get_reply(
-        client,
-        reasoning_generation_system_prompt,
-        user_prompt,
-        image_base64,
-        Distractors,
-    )["distractors"]
-    distractors_visual_interpretation = get_reply(
-        client,
-        visual_interpretation_generation_system_prompt,
-        user_prompt,
-        image_base64,
-        Distractors,
-    )["distractors"]
-    distractors_data_processing = get_reply(
-        client,
-        data_processing_generation_system_prompt,
-        user_prompt,
-        image_base64,
-        Distractors,
-    )["distractors"]
-    distractors_question_bias = get_reply(
-        client,
-        question_bias_generation_system_prompt,
-        user_prompt,
-        image_base64,
-        Distractors,
-    )["distractors"]
-    # print(distractors_concept)
-
-    if reviewer:
-        user_prompt = """
-            Question: {question}
-            Correct Answer: {answer}
-            Distractions and Reasonings: {distractors}
-        """
-        reviews_concept = get_reply(
-            client,
-            review_system_prompt.format(type="conceptual"),
-            user_prompt.format(
-                question=question, answer=answer, distractors=distractors_concept
-            ),
-            image_base64,
-            CommentFormat,
-        )["comments"]
-        reviews_reasoning = get_reply(
-            client,
-            review_system_prompt.format(type="reasoning"),
-            user_prompt.format(
-                question=question, answer=answer, distractors=distractors_reasoning
-            ),
-            image_base64,
-            CommentFormat,
-        )["comments"]
-        reviews_visual_interpretation = get_reply(
-            client,
-            review_system_prompt.format(type="visual interpretation"),
-            user_prompt.format(
-                question=question,
-                answer=answer,
-                distractors=distractors_visual_interpretation,
-            ),
-            image_base64,
-            CommentFormat,
-        )["comments"]
-        reviews_data_processing = get_reply(
-            client,
-            review_system_prompt.format(type="data processing"),
-            user_prompt.format(
-                question=question,
-                answer=answer,
-                distractors=distractors_data_processing,
-            ),
-            image_base64,
-            CommentFormat,
-        )["comments"]
-        reviews_question_bias = get_reply(
-            client,
-            review_system_prompt.format(type="question bias"),
-            user_prompt.format(
-                question=question, answer=answer, distractors=distractors_question_bias
-            ),
-            image_base64,
-            CommentFormat,
-        )["comments"]
-        # print(reviews_concept)
-
-        user_prompt = """
-            Question: {question}
-            Correct Answer: {answer}
-            Distractions and Reviewer Comments: {reviews}
-        """
-        distractors_concept = get_reply(
-            client,
-            refine_system_prompt_concept,
-            user_prompt.format(
-                question=question, answer=answer, reviews=reviews_concept
-            ),
-            image_base64,
-            Distractors,
-        )["distractors"]
-        distractors_reasoning = get_reply(
-            client,
-            refine_system_prompt_reason,
-            user_prompt.format(
-                question=question, answer=answer, reviews=reviews_reasoning
-            ),
-            image_base64,
-            Distractors,
-        )["distractors"]
-        distractors_visual_interpretation = get_reply(
-            client,
-            refine_system_prompt_visual,
-            user_prompt.format(
-                question=question, answer=answer, reviews=reviews_visual_interpretation
-            ),
-            image_base64,
-            Distractors,
-        )["distractors"]
-        distractors_data_processing = get_reply(
-            client,
-            refine_system_prompt_data,
-            user_prompt.format(
-                question=question, answer=answer, reviews=reviews_data_processing
-            ),
-            image_base64,
-            Distractors,
-        )["distractors"]
-        distractors_question_bias = get_reply(
-            client,
-            refine_system_prompt_question_bias,
-            user_prompt.format(
-                question=question, answer=answer, reviews=reviews_question_bias
-            ),
-            image_base64,
-            Distractors,
-        )["distractors"]
-        # print(distractors_concept)
-
-    distractors = (
-        distractors_concept
-        + distractors_reasoning
-        + distractors_visual_interpretation
-        + distractors_data_processing
-        + distractors_question_bias
-    )
-
-    user_prompt = f"""
-    Question: {question}
-    Correct Answer: {answer}
-    All Distractors: {distractors}
+    Parse the prediction from the generated response.
+    Return the predicted index e.g., A, B, C, D.
     """
+    response = str(response)
+    for char in [',', '.', '!', '?', ';', ':', "'"]:
+        response = response.strip(char)
+    response = " " + response + " " # add space to avoid partial match
 
-    distractors = get_reply(
-        client, fusion_generation_system_prompt, user_prompt, image_base64, Distractors
-    )["distractors"]
+    index_ans = True
+    ans_with_brack = False
+    candidates = []
+    for choice in all_choices:  # e.g., (A) (B) (C) (D)
+        if f'({choice})' in response or f'{choice}. ' in response:
+            candidates.append(choice)
+            ans_with_brack = True
 
-    return distractors
+    if len(candidates) == 0:
+        for choice in all_choices: # e.g., A B C D
+            if f' {choice} ' in response:
+                candidates.append(choice)
 
+    # if all above doesn't get candidates, check if the content is larger than 5 tokens and try to parse the example
+    if len(candidates) == 0 and len(response.split()) > 5:
+        for index, ans in index2ans.items():
+            if ans.lower() in response.lower():
+                candidates.append(index)
+                index_ans = False # it's content ans.
 
-def judge_multichoice_correctness_with_image(
-    client, question, choices, answer, image_base64
-):
-    user_prompt = f"""
-    Question: {question}
-    Choices: {choices}
-    Correct Answer: {answer}
-    """
-    response = get_reply(
-        client,
-        evaluator_system_prompt,
-        user_prompt,
-        image_base64,
-        Judgement,
-    )
-    return response
+    if len(candidates) == 0:  # still not get answer, randomly choose one.
+        pred_index = random.choice(all_choices)
+    elif len(candidates) > 1:
+        start_indexes = []
+        if index_ans:
+            if ans_with_brack: 
+                for can in candidates:
+                    index = response.rfind(f'({can})')
+                    start_indexes.append(index) # -1 will be ignored anyway
+                # start_indexes = [generated_response.index(f'({can})') for can in candidates]
+            else:
+                for can in candidates:
+                    index = response.rfind(f" {can} ")
+                    start_indexes.append(index)
+        else:
+            for can in candidates:
+                index = response.lower().rfind(index2ans[can].lower())
+                start_indexes.append(index)
+        # get the last one
+        pred_index = candidates[np.argmax(start_indexes)]
+    else: # if only one candidate, use it.
+        pred_index = candidates[0]
 
-
-def improve_multichoice_correctness_with_image(
-    client,
-    question,
-    choices,
-    answer,
-    issue,
-    improvement,
-    image_base64,
-):
-    user_prompt = f"""
-    Question: {question}
-    Choices: {choices}
-    Correct Answer: {answer}
-    Identified Issues: {issue}
-    Suggested Improvements: {improvement}
-    """
-
-    response = get_reply(
-        client,
-        refiner_system_prompt,
-        user_prompt,
-        image_base64,
-        Question,
-    )
-    return response
+    return pred_index
 
 
-def process_one_question(api_key, image, question, answer, components):
-    reviewer = "Reviewer" in components
-    refiner = "Refiner" in components
 
-    pil_image = Image.fromarray(image)
+def get_mc_score(row, use_parse = True):
+    if use_parse:
+        if pd.isna(row["A"]):
+            return False
+        response = row["prediction"]
+        all_choices = []
+        for i in range(9):
+            if chr(65+i) in row and pd.isna(row[chr(65+i)])== False:
+                all_choices.append(chr(65+i))
+        index2ans = {index: row[index] for index in all_choices}
+        pred_index = parse_multi_choice_response(response, all_choices, index2ans)
+    else:
+        pred_index = row["output"]
+    return pred_index == row["answer"]
 
-    buffer = io.BytesIO()
-    pil_image.save(buffer, format="PNG")
-    buffer.seek(0)
-    image_base64 = base64.b64encode(buffer.read()).decode("utf-8")
+def process_json(file):
+    try:
+        data = json.load(file)
+    except json.JSONDecodeError:
+        return "Error: Invalid JSON format. Please upload a valid JSON file."
 
-    random.seed(1234)
-    client = OpenAI(api_key=api_key)
-    distactors = convert_to_multi_choice(
-        client, question, answer, image_base64, reviewer
-    )
+    if not isinstance(data, list):
+        return "Error: JSON must be a list of records."
+    
+    required_fields = ['index', 'prediction']
+    for record in data:
+        if not all(field in record for field in required_fields):
+            return f"Error: Each record must contain the following fields: {', '.join(required_fields)}"
 
-    choices = [item["text"] for item in distactors] + [answer]
-    random.shuffle(choices)
+    # Convert to DataFrame
+    df = pd.DataFrame(data)
+    answer_data = json.load(open("data/answer.json"))
 
-    if refiner:
-        judgement = judge_multichoice_correctness_with_image(
-            client, question, choices, answer, image_base64
-        )
-        distractors = improve_multichoice_correctness_with_image(
-            client,
-            question,
-            choices,
-            answer,
-            judgement["reasoning"],
-            judgement["improvement"],
-            image_base64,
-        )
+    
+    # Example categories
+    general_datasets = ["SEEDBench", "MMStar", "A-OKVQA", "VizWiz", "MMVet", 
+                      "VQAv2", "OKVQA"]
+    reason_datasets = ["MMMU", "MathVista", "ScienceQA", "RealWorldQA",  "GQA", "MathVision"]
+    ocr_datasets = ["TextVQA", "OCRVQA"]
+    doc_datasets = ["AI2D", "ChartQA","DocVQA", "InfoVQA",  "TableVQABench"]
+    try:
+        score = df.apply(get_mc_score, axis=1) * 100
+        df['score'] = score.round(2)
+    except Exception as e:
+        return f"Error during scoring: {str(e)}"
 
-        choices = distractors["distractors"] + [answer]
-        random.shuffle(choices)
+    # Calculate metrics for each category
+    results = {}
+    for category in df['category'].unique():
+        category_df = df[df['category'] == category]
+        category_result = category_df['score'].mean()
+        results[category] = category_result
 
-    output = f"Question: {question}\n\nA. {choices[0]}\nB. {choices[1]}\nC. {choices[2]}\nD. {choices[3]}\n\nAnswer: {'ABCD'[choices.index(answer)]}"
-    return output
+    # Compute overall and category-wise results
+    overall_result = df['score'].mean()
+    general_result = df[df['category'].isin(general_datasets)]['score'].mean() if len(df[df['category'].isin(general_datasets)]) > 0 else None
+    reasoning_result = df[df['category'].isin(reason_datasets)]['score'].mean() if len(df[df['category'].isin(reason_datasets)]) > 0 else None
+    ocr_result = df[df['category'].isin(ocr_datasets)]['score'].mean() if len(df[df['category'].isin(ocr_datasets)]) > 0 else None
+    doc_result = df[df['category'].isin(doc_datasets)]['score'].mean() if len(df[df['category'].isin(doc_datasets)]) > 0 else None
 
+    # Return as a dictionary or formatted string
+    results['Overall'] = overall_result
+    results['General'] = general_result
+    results['Reasoning'] = reasoning_result
+    results['OCR'] = ocr_result
+    results['Doc & Chart'] = doc_result
+
+    # Optionally save results or return to user
+    return json.dumps(results, indent=4)
 
 def main_gradio():
+    # # read the jsonl file in /pasteur2/u/suyc/VLMEval/OE-MC/.model_results/arxiv/all/cambrian_8b_VMCBench_ALL.jsonl, drop the prediction column and save it as a json
+    # raw_data = [json.loads(x) for x in open("/pasteur2/u/suyc/VLMEval/VLMEvalKit/LMUData/VMCBench-9018.jsonl")]
+    # raw_data = pd.DataFrame(raw_data)
+    # raw_data = raw_data.drop(columns=["image"])
+    
+    # raw_data = raw_data.to_dict(orient="records")
+    # with open("data/answer.json", "w") as f:
+    #     json.dump(raw_data, f)
+    
+    
+    # Example JSON format string
+    example_json = '''[
+      {
+        "index": 1,
+        "prediction": "A"
+      },
+      {
+        "index": 2,
+        "prediction": "The answer is C. cat"
+      }
+    ]'''
+    
     interface = gr.Interface(
-        fn=process_one_question,
-        inputs=[
-            gr.Textbox(label="OpenAI API Key"),
-            gr.Image(label="Upload an Image"),
-            gr.Textbox(label="Question"),
-            gr.Textbox(label="Answer"),
-            gr.CheckboxGroup(["Reviewer", "Refiner"], label="Components"),
-        ],
-        outputs=gr.Textbox(label="Output"),
-        title="AutoConverter: Automated Generation of Challenging Multiple-Choice Questions for Vision Language Model Evaluation",
+        fn=process_json,
+        inputs=gr.File(label="Upload JSON File"),
+        outputs=gr.Textbox(label="Evaluation Results", interactive=False),
+        title="Automated Evaluation for Multiple-Choice Questions",
+        description=f"Upload a JSON file containing question index and model prediction to evaluate the performance.\n\n"
+                    f"Example JSON format:\n\n{example_json}\n\n"
+                    "Each record should contain the fields: 'index', 'prediction'.",
     )
     interface.launch()
-
+    
 
 if __name__ == "__main__":
     main_gradio()

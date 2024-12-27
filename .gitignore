@@ -1,6 +1,4 @@
-data/
 images/
-*.json
 *.jsonl
 *.tsv
 *.png
