@@ -5,7 +5,7 @@
 [![Pytorch](https://img.shields.io/badge/Pytorch-2.5-red.svg)](https://pytorch.org/get-started/previous-versions/#v25)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-This repo provides the PyTorch source code of our paper: [Automated Generation of Challenging Multiple Choice Questions for Vision Language Model Evaluation](https://arxiv.org/abs/2501.03225). Check out project page [here](https://yuhui-zh15.github.io/AutoConverter-Website/)!
+This repo provides the PyTorch source code of our paper: [Automated Generation of Challenging Multiple Choice Questions for Vision Language Model Evaluation](https://arxiv.org/abs/2501.03225) (**CVPR 2025**). Check out project page [here](https://yuhui-zh15.github.io/AutoConverter-Website/)!
 
 ## 🔮 Abstract
 
@@ -27,10 +27,10 @@ Dataset is available at [Huggingface](https://huggingface.co/datasets/suyc21/VMC
 
 If you use this repo in your research, please cite it as follows:
 ```
-@article{AutoConverter,
+@inproceedings{AutoConverter,
   title={Automated Generation of Challenging Multiple-Choice Questions for Vision Language Model Evaluation},
   author={Yuhui Zhang and Yuchang Su and Yiming Liu and Xiaohan Wang and James Burgess and Elaine Sui and Chenyu Wang and Josiah Aklilu and Alejandro Lozano and Anjiang Wei and Ludwig Schmidt and Serena Yeung-Levy},
-  journal={arXiv preprint arXiv:2501.03225},
+  booktitle={Conference on Computer Vision and Pattern Recognition (CVPR)},
   year={2025}
 }
 ```
