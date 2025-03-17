@@ -23,6 +23,13 @@ Check out [main.py](main.py) for the implementation of AutoConverter.
 
 Dataset is available at [Huggingface](https://huggingface.co/datasets/suyc21/VMCBench).
 
+## 📈 Evaluation of VMCBench
+
+VMCBench is officially supported by [VLMEvalKit](https://github.com/open-compass/VLMEvalKit) and [lmms-eval](https://github.com/EvolvingLMMs-Lab/lmms-eval). Here are the running commands:
+
+- VLMEvalKit: `python run.py --data VMCBench_DEV --model llava_v1.5_7b`
+- lmms-eval: `python -m accelerate.commands.launch -m lmms_eval --model llava --model_args pretrained="liuhaotian/llava-v1.5-7b" --tasks vmcbench`
+
 ## 🎯 Citation
 
 If you use this repo in your research, please cite it as follows:
